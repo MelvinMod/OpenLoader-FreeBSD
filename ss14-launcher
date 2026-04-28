@@ -1,0 +1,39 @@
+#!/bin/sh
+
+PREFIX="/usr/local"
+LAUNCHER="$PREFIX/bin/SS14.Launcher"
+CONFIG_DIR="$HOME/.config/SS14.Launcher"
+DATA_DIR="$HOME/.local/share/SS14.Launcher"
+CACHE_DIR="$HOME/.cache/SS14.Launcher"
+
+mkdir -p "$CONFIG_DIR"
+mkdir -p "$DATA_DIR"
+mkdir -p "$CACHE_DIR"
+
+export XDG_CURRENT_DESKTOP="KDE"
+export QT_QPA_PLATFORM="xcb"
+export SDL_VIDEODRIVER="x11"
+export SDL_AUDIODRIVER="pulseaudio"
+export XDG_CONFIG_HOME="$CONFIG_DIR"
+export XDG_DATA_HOME="$DATA_DIR"
+export XDG_CACHE_HOME="$CACHE_DIR"
+
+if [ -n "$KDE_SESSION_VERSION" ]; then
+    export QT_STYLE_OVERRIDE="Breeze"
+    export KDE_SESSION_VERSION="6"
+fi
+
+if [ -n "$WAYLAND_DISPLAY" ]; then
+    export SDL_VIDEODRIVER="wayland"
+    export QT_QPA_PLATFORM="wayland"
+fi
+
+if [ -f "$PREFIX/lib/openloader/openloader.conf" ]; then
+    . "$PREFIX/lib/openloader/openloader.conf"
+fi
+
+if [ -f "$CONFIG_DIR/openloader.conf" ]; then
+    . "$CONFIG_DIR/openloader.conf"
+fi
+
+exec "$LAUNCHER" "$@"

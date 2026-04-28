@@ -1,0 +1,14 @@
+OpenLoader is a mod loader for Space Station 14, a popular multiplayer
+space station simulation game. It is the successor to MarZeyLoader and
+provides enhanced features for modding and game launching.
+
+Features:
+- Multi-account support
+- Smart HWId spoofing
+- Harmony patch support
+- Cross-platform compatibility
+
+This port builds OpenLoader natively for FreeBSD using the freebsd-x64
+runtime identifier.
+
+WWW: https://github.com/NLP-Core-Team/OpenLoader

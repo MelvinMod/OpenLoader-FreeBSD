@@ -1,0 +1,11 @@
+bin/SS14.Launcher
+bin/openloader
+lib/openloader/bin/SS14.Launcher
+lib/openloader/bin/SS14.Launcher.dll
+lib/openloader/bin/signing_key
+lib/openloader/bin/loader/SS14.Loader
+lib/openloader/bin/loader/SS14.Loader.dll
+lib/openloader/Marsey/Mods/.gitkeep
+lib/openloader/Marsey/ResourcePacks/.gitkeep
+share/applications/ss14-launcher.desktop
+share/icons/hicolor/256x256/apps/ss14-launcher.png

@@ -1,0 +1,123 @@
+# OpenLoader FreeBSD Build Makefile
+# For manual building without FreeBSD ports
+
+PREFIX ?= /usr/local
+BINDIR = $(PREFIX)/bin
+LIBDIR = $(PREFIX)/lib/openloader
+DATADIR = $(PREFIX)/share/openloader
+
+BUILDDIR = bin/publish/FreeBSD
+
+LAUNCHER_PROJECT = ../OpenLoader-main/SS14.Launcher/SS14.Launcher.csproj
+LOADER_PROJECT = ../OpenLoader-main/SS14.Loader/SS14.Loader.csproj
+
+RUNTIME = linux-x64
+CONFIG = Release
+FRAMEWORK = net10.0
+
+.PHONY: all build launcher loader clean install uninstall package help
+
+all: build
+
+build: launcher loader
+	@echo "Build complete!"
+
+launcher:
+	@echo "Building SS14.Launcher..."
+	dotnet publish $(LAUNCHER_PROJECT) \
+		/p:FullRelease=True \
+		-c $(CONFIG) \
+		--no-self-contained \
+		-r $(RUNTIME) \
+		/nologo \
+		/p:RobustILLink=true
+
+loader:
+	@echo "Building SS14.Loader..."
+	dotnet publish $(LOADER_PROJECT) \
+		-c $(CONFIG) \
+		--no-self-contained \
+		-r $(RUNTIME) \
+		/nologo
+
+setup-dirs:
+	@echo "Creating directory structure..."
+	mkdir -p $(BUILDDIR)/bin
+	mkdir -p $(BUILDDIR)/bin/loader
+	mkdir -p $(BUILDDIR)/Marsey/Mods
+	mkdir -p $(BUILDDIR)/Marsey/ResourcePacks
+
+copy-files: setup-dirs
+	@echo "Copying files..."
+	cp -r ../OpenLoader-main/PublishFiles/* $(BUILDDIR)/ 2>/dev/null || true
+	cp ../OpenLoader-main/SS14.Launcher/bin/$(CONFIG)/$(FRAMEWORK)/$(RUNTIME)/publish/* $(BUILDDIR)/bin/
+	cp ../OpenLoader-main/SS14.Loader/bin/$(CONFIG)/$(FRAMEWORK)/$(RUNTIME)/publish/* $(BUILDDIR)/bin/loader/
+	cp ../OpenLoader-main/SS14.Launcher/signing_key $(BUILDDIR)/bin/ 2>/dev/null || true
+
+package: build copy-files
+	@echo "Creating archive..."
+	cd $(BUILDDIR) && zip -r ../../../../SS14.Launcher_FreeBSD.zip .
+	@echo "Archive created: SS14.Launcher_FreeBSD.zip"
+
+install: build copy-files
+	@echo "Installing to $(PREFIX)..."
+	mkdir -p $(DESTDIR)$(BINDIR)
+	mkdir -p $(DESTDIR)$(LIBDIR)/bin
+	mkdir -p $(DESTDIR)$(LIBDIR)/bin/loader
+	mkdir -p $(DESTDIR)$(LIBDIR)/Marsey/Mods
+	mkdir -p $(DESTDIR)$(LIBDIR)/Marsey/ResourcePacks
+	mkdir -p $(DESTDIR)$(DATADIR)/applications
+	mkdir -p $(DESTDIR)$(DATADIR)/icons
+
+	cp $(BUILDDIR)/bin/SS14.Launcher $(DESTDIR)$(BINDIR)/
+	cp $(BUILDDIR)/bin/SS14.Launcher.dll $(DESTDIR)$(LIBDIR)/bin/
+	cp $(BUILDDIR)/bin/loader/SS14.Loader $(DESTDIR)$(LIBDIR)/bin/loader/
+	cp $(BUILDDIR)/bin/loader/SS14.Loader.dll $(DESTDIR)$(LIBDIR)/bin/loader/
+	cp $(BUILDDIR)/bin/signing_key $(DESTDIR)$(LIBDIR)/bin/ 2>/dev/null || true
+
+	ln -sf $(BINDIR)/SS14.Launcher $(DESTDIR)$(BINDIR)/openloader
+
+	cp ss14-launcher.desktop $(DESTDIR)$(DATADIR)/applications/ 2>/dev/null || true
+
+	@echo "Installation complete!"
+	@echo "Run with: $(DESTDIR)$(BINDIR)/SS14.Launcher"
+
+uninstall:
+	@echo "Uninstalling OpenLoader..."
+	rm -f $(DESTDIR)$(BINDIR)/SS14.Launcher
+	rm -f $(DESTDIR)$(BINDIR)/openloader
+	rm -rf $(DESTDIR)$(LIBDIR)
+	rm -f $(DESTDIR)$(DATADIR)/applications/ss14-launcher.desktop
+
+clean:
+	@echo "Cleaning build artifacts..."
+	rm -rf ../OpenLoader-main/**/bin
+	rm -rf ../OpenLoader-main/**/obj
+	rm -rf $(BUILDDIR)
+	rm -f SS14.Launcher_FreeBSD.zip
+	rm -f ../SS14.Launcher_FreeBSD.zip
+
+help:
+	@echo "OpenLoader FreeBSD Build System"
+	@echo ""
+	@echo "Usage: make [target]"
+	@echo ""
+	@echo "Targets:"
+	@echo "  all       - Build everything (default)"
+	@echo "  build     - Build Launcher and Loader"
+	@echo "  launcher  - Build only Launcher"
+	@echo "  loader    - Build only Loader"
+	@echo "  package   - Build and create ZIP archive"
+	@echo "  install   - Install to system"
+	@echo "  uninstall - Remove from system"
+	@echo "  clean     - Remove build artifacts"
+	@echo "  help      - Show this help"
+	@echo ""
+	@echo "Variables:"
+	@echo "  PREFIX    - Installation prefix (default: /usr/local)"
+	@echo ""
+	@echo "Examples:"
+	@echo "  make build"
+	@echo "  make package"
+	@echo "  sudo make install PREFIX=/opt/openloader"
+	@echo "  make clean"
