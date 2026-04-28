@@ -1,6 +1,6 @@
 # OpenLoader for FreeBSD
 
-**Complete FreeBSD port of OpenLoader with enhanced security and privacy features.**
+**Complete FreeBSD port of [OpenLoader](https://github.com/ddepsadd/OpenLoader) with enhanced security and privacy features.**
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]()
 [![Version](https://img.shields.io/badge/version-0.29.1-blue)]()
